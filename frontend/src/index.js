@@ -1,13 +1,52 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import {
+  ApolloClient,
+  ApolloProvider,
+  gql,
+  InMemoryCache,
+  useQuery,
+} from "@apollo/client";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+import reportWebVitals from "./reportWebVitals";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const client = new ApolloClient({
+  uri: "http://localhost:4000",
+  cache: new InMemoryCache(),
+});
+
+const BOOKS = gql`
+  query Books {
+    books {
+      title
+      author
+    }
+  }
+`;
+
+const Books = () => {
+  const { loading, error, data } = useQuery(BOOKS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+  return data.books.map(({ title, author }) => (
+    <div key={title}>
+      <p>
+        {title} by {author}
+      </p>
+    </div>
+  ));
+};
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <ApolloProvider client={client}>
+      <App />
+      <Books />
+    </ApolloProvider>
   </React.StrictMode>
 );
 
